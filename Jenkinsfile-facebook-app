@@ -1,0 +1,52 @@
+node{
+  def mavenHome = tool name: 'maven3.8.6'
+  stage('1clonecode'){
+    git credentialsId: 'LIONTECH-GIT-CREDENTIALS', url: 'https://github.com/liontech-october-session-2022/liontech-app3.git'
+  }
+   stage('2Test&Build'){
+     sh "${mavenHome}/bin/mvn clean package"
+
+   }
+
+   stage('3CodeQualityanalysis'){
+      sh "${mavenHome}/bin/mvn   sonar:sonar" 
+   }
+    stage('4uploadArtifacts'){
+      sh "${mavenHome}/bin/mvn   deploy"
+    }
+
+    stage('5deploy2TEST'){
+      deploy adapters: [tomcat9(credentialsId: 'PRINCE-TOMCAT-USER', path: '', url: 'http://3.98.141.130:8009/')], contextPath: 'facebook-app', war: 'target/*war'
+    }
+
+    stage('6TechLeadApproval') {
+      sh  "echo 'application is ready for review and feedback'"
+      timeout(time:5, unit:'DAYS'){
+      input message: 'facebook application is now ready for feedback and cap approval'
+      }
+    }
+    stage('7Deploy2DEV'){
+       deploy adapters: [tomcat9(credentialsId: 'PRINCE-TOMCAT-USER', path: '', url: 'http://3.98.141.130:8009/')], contextPath: 'facebook-app', war: 'target/*war'
+    }
+    stage('8QA-approvalandTesting') {
+      sh  "echo 'application is ready penetration and regression testing'"
+      timeout(time:5, unit:'DAYS'){
+      input message: 'waiting for regression and penetration test results before deploying to UAT'
+      }
+    }
+     stage('9deploytoUAT/PREPROD'){
+       deploy adapters: [tomcat9(credentialsId: 'PRINCE-TOMCAT-USER', path: '', url: 'http://3.98.141.130:8009/')], contextPath: 'facebook-app', war: 'target/*war'
+    }
+    stage('10Congrats-READ-4PROD') {
+      sh  "echo 'Congratulation Lion Tech golden engineers, we are ready for prod'"
+      timeout(time:5, unit:'DAYS'){
+      input message: 'thank for your hard work and dedication to the company'
+      }
+    } 
+
+    stage('11-deploytoprod'){
+
+      deploy adapters: [tomcat9(credentialsId: 'PRINCE-TOMCAT-USER', path: '', url: 'http://3.98.141.130:8009/')], contextPath: 'facebook-app-prod', war: 'target/*war'
+    }
+
+}
