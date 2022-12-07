@@ -40,7 +40,7 @@ node{
     stage('10Congrats-READ-4PROD') {
       sh  "echo 'Congratulation Lion Tech golden engineers, we are ready for prod'"
       timeout(time:5, unit:'DAYS'){
-      input message: 'thank for your hard work and dedication to the company'
+      input message: 'thank for your hard work and dedication to the company, you are lions'
       }
     } 
 
